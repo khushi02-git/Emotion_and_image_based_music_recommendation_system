@@ -7,8 +7,6 @@ from tensorflow.keras.models import load_model
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
-
-# ---------------- MODEL ----------------
 model = load_model("best_model.h5")
 
 emotion_labels = [
@@ -19,8 +17,6 @@ emotion_labels = [
 face_cascade = cv2.CascadeClassifier(
     cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
 )
-
-# ---------------- MUSIC ----------------
 emotion_files = {
     "happy": "songs/happy.csv",
     "sad": "songs/sad.csv",
@@ -31,7 +27,6 @@ emotion_files = {
     "disgust": "songs/disgusted.csv",
     "contempt": "songs/contempt.csv"
 }
-
 music_data = {}
 for emotion, file in emotion_files.items():
     if os.path.exists(file):
@@ -41,16 +36,12 @@ for emotion, file in emotion_files.items():
         else:
             songs = df.iloc[:, 0].dropna().tolist()
         music_data[emotion] = songs
-
-# ---------------- SMOOTHING ----------------
 emotion_buffer = []
 def get_stable_emotion(new_emotion):
     emotion_buffer.append(new_emotion)
     if len(emotion_buffer) > 5:
         emotion_buffer.pop(0)
     return Counter(emotion_buffer).most_common(1)[0][0]
-
-# ---------------- DETECTION ----------------
 def detect_emotion(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
@@ -71,26 +62,21 @@ def detect_emotion(frame):
         return emotion, confidence, (x, y, w, h)
 
     return "neutral", 0, None
-
-# ---------------- UI SETUP ----------------
 root = tk.Tk()
 root.title("Emotion Music Player")
 root.geometry("1100x600")
 root.configure(bg="#121212")
 
-# STYLE
 style = ttk.Style()
 style.theme_use("default")
 style.configure("TButton", font=("Segoe UI", 10), padding=6)
 
-# LEFT: VIDEO
 video_frame = tk.Frame(root, bg="#121212")
 video_frame.pack(side="left", padx=10, pady=10)
 
 video_label = tk.Label(video_frame, bg="#000")
 video_label.pack()
 
-# RIGHT: CONTROL PANEL
 panel = tk.Frame(root, bg="#1e1e1e", width=350)
 panel.pack(side="right", fill="y")
 
@@ -106,7 +92,6 @@ confidence_label = tk.Label(panel, text="Confidence: -", fg="#00ffcc",
                             bg="#1e1e1e", font=("Segoe UI", 12))
 confidence_label.pack(pady=5)
 
-# SONG LIST WITH SCROLL
 frame_list = tk.Frame(panel)
 frame_list.pack(pady=15)
 
@@ -120,7 +105,6 @@ songs_box.pack()
 
 scrollbar.config(command=songs_box.yview)
 
-# BUTTONS
 btn_frame = tk.Frame(panel, bg="#1e1e1e")
 btn_frame.pack(pady=20)
 
@@ -133,12 +117,10 @@ stop_btn.grid(row=0, column=1, padx=10)
 exit_btn = ttk.Button(panel, text="Exit", command=root.destroy)
 exit_btn.pack(pady=10)
 
-# ---------------- CAMERA ----------------
 cap = None
 running = False
 last_emotion = ""
 
-# ---------------- LOOP ----------------
 def update_frame():
     global last_emotion
 
@@ -182,7 +164,6 @@ def update_frame():
 
     root.after(10, update_frame)
 
-# ---------------- BUTTON FUNCTIONS ----------------
 def start_camera():
     global cap, running
     if not running:
@@ -199,7 +180,6 @@ def stop_camera():
 start_btn.config(command=start_camera)
 stop_btn.config(command=stop_camera)
 
-# ---------------- RUN ----------------
 root.mainloop()
 
 if cap:
